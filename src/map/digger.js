@@ -47,7 +47,6 @@ ROT.Map.Digger.prototype.create = function(callback) {
 	var t1 = Date.now();
 
 	do {
-		//console.log('........')
 		var t2 = Date.now();
 		if (t2 - t1 > this._options.timeLimit) { break; }
 
@@ -60,8 +59,6 @@ ROT.Map.Digger.prototype.create = function(callback) {
 		var y = parseInt(parts[1]);
 		var dir = this._getDiggingDirection(x, y);
 		if (!dir) { continue; } /* this wall is not suitable */
-		
-		console.log("wall", x, y);
 
 		/* try adding a feature */
 		var featureAttempts = 0;
@@ -94,8 +91,8 @@ ROT.Map.Digger.prototype.create = function(callback) {
 		}
 	}
 	
-	this._walls = {};
-	this._map = null;
+	//this._walls = {};
+	//this._map = null;
 
 	return this;
 }
