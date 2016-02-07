@@ -1,6 +1,6 @@
 /*
 	This is rot.js, the ROguelike Toolkit in JavaScript.
-	Version 0.6~dev, generated on Fri Jan 29 21:37:11 EST 2016.
+	Version 0.6~dev, generated on Sat Feb  6 23:40:05 EST 2016.
 */
 /**
  * @namespace Top-level ROT namespace
@@ -552,23 +552,29 @@ ROT.Text = {
 /**
  * @returns {any} Randomly picked item, null when length=0
  */
-Array.prototype.random = Array.prototype.random || function() {
-	if (!this.length) { return null; }
-	return this[Math.floor(ROT.RNG.getUniform() * this.length)];
+/*
+ROT.random = function(arr) {
+	if (!arr.length) { return null; }
+	return arr[Math.floor(ROT.getUniform() * arr.length)];
 }
+*/
 
 /**
  * @returns {array} New array with randomized items
  * FIXME destroys this!
  */
-Array.prototype.randomize = Array.prototype.randomize || function() {
+
+/*
+ROT.randomize = function(arr) {
 	var result = [];
-	while (this.length) {
-		var index = this.indexOf(this.random());
-		result.push(this.splice(index, 1)[0]);
+	while (arr.length) {
+		var index = arr.indexOf(ROT.random(arr));
+		result.push(arr.splice(index, 1)[0]);
 	}
 	return result;
 }
+*/
+
 /**
  * Always positive modulus
  * @param {int} n Modulus
@@ -1498,6 +1504,26 @@ ROT.RNG = {
 }
 
 ROT.RNG.setSeed(Date.now());
+
+ROT.RNG.random = function(arr) {
+	if (!arr.length) { return null; }
+	return arr[Math.floor(this.getUniform() * arr.length)];
+}
+
+
+/**
+ * @returns {array} New array with randomized items
+ * FIXME destroys this!
+ */
+
+ROT.RNG.randomize = function(arr) {
+	var result = [];
+	while (arr.length) {
+		var index = arr.indexOf(this.random(arr));
+		result.push(arr.splice(index, 1)[0]);
+	}
+	return result;
+}
 /**
  * @class (Markov process)-based string generator. 
  * Copied from a <a href="http://www.roguebasin.roguelikedevelopment.org/index.php?title=Names_from_a_high_order_Markov_Process_and_a_simplified_Katz_back-off_scheme">RogueBasin article</a>. 
@@ -2041,8 +2067,8 @@ ROT.Map.DividedMaze.prototype._partitionRoom = function(room) {
 
 	if (!availX.length || !availY.length) { return; }
 
-	var x = availX.random();
-	var y = availY.random();
+	var x = ROT.RNG.random(availX);
+	var y = ROT.RNG.random(availY);
 	
 	this._map[x][y] = 1;
 	
@@ -2072,12 +2098,12 @@ ROT.Map.DividedMaze.prototype._partitionRoom = function(room) {
 		w.push([x, j]); 
 	}
 		
-	var solid = walls.random();
+	var solid = ROT.RNG.random(walls);
 	for (var i=0;i<walls.length;i++) {
 		var w = walls[i];
 		if (w == solid) { continue; }
 		
-		var hole = w.random();
+		var hole = ROT.RNG.random(w);
 		this._map[hole[0]][hole[1]] = 0;
 	}
 
@@ -2641,8 +2667,6 @@ ROT.Map.Digger.prototype.create = function(callback) {
 		var y = parseInt(parts[1]);
 		var dir = this._getDiggingDirection(x, y);
 		if (!dir) { continue; } /* this wall is not suitable */
-		
-//		console.log("wall", x, y);
 
 		/* try adding a feature */
 		var featureAttempts = 0;
@@ -2662,10 +2686,12 @@ ROT.Map.Digger.prototype.create = function(callback) {
 		}
 
 	} while (this._dug/area < this._options.dugPercentage || priorityWalls); /* fixme number of priority walls */
-
+	//console.log('adding doors')
 	this._addDoors();
+	//console.log('calling back')
 
 	if (callback) {
+		//console.log('... calback detetcted this._width = '+this._width+', this._height = '+this._height);
 		for (var i=0;i<this._width;i++) {
 			for (var j=0;j<this._height;j++) {
 				callback(i, j, this._map[i][j]);
@@ -2673,8 +2699,8 @@ ROT.Map.Digger.prototype.create = function(callback) {
 		}
 	}
 	
-	this._walls = {};
-	this._map = null;
+	//this._walls = {};
+	//this._map = null;
 
 	return this;
 }
@@ -2727,8 +2753,8 @@ ROT.Map.Digger.prototype._findWall = function() {
 	
 	var arr = (prio2.length ? prio2 : prio1);
 	if (!arr.length) { return null; } /* no walls :/ */
-	
-	var id = arr.random();
+
+	var id = ROT.RNG.random(arr);
 	delete this._walls[id];
 
 	return id;
@@ -2924,13 +2950,13 @@ ROT.Map.Uniform.prototype._generateCorridors = function() {
 			room.create(this._digCallback); 
 		}
 
-		this._unconnected = this._rooms.slice().randomize();
+		this._unconnected = ROT.RNG.randomize(this._rooms.slice());
 		this._connected = [];
 		if (this._unconnected.length) { this._connected.push(this._unconnected.pop()); } /* first one is always connected */
 		
 		while (1) {
 			/* 1. pick random connected room */
-			var connected = this._connected.random();
+			var connected = ROT.RNG.random(this._connected);
 			
 			/* 2. find closest unconnected */
 			var room1 = this._closestRoom(this._unconnected, connected);
@@ -3114,7 +3140,7 @@ ROT.Map.Uniform.prototype._placeInWall = function(room, dirIndex) {
 	for (var i=avail.length-1; i>=0; i--) {
 		if (!avail[i]) { avail.splice(i, 1); }
 	}
-	return (avail.length ? avail.random() : null);
+	return (avail.length ? ROT.RNG.random(avail) : null);
 }
 
 /**
@@ -3245,7 +3271,7 @@ ROT.Map.Rogue.prototype._connectRooms = function() {
 	
 		//var dirToCheck = [0,1,2,3,4,5,6,7];
 		var dirToCheck = [0,2,4,6];
-		dirToCheck = dirToCheck.randomize();
+		dirToCheck = ROT.RNG.randomize(dirToCheck);
 		
 		do {
 			found = false;
@@ -3294,7 +3320,7 @@ ROT.Map.Rogue.prototype._connectUnconnectedRooms = function() {
 	var ch = this._options.cellHeight;
 	
 	var randomConnectedCell;
-	this.connectedCells = this.connectedCells.randomize();
+	this.connectedCells = ROT.RNG.randomize(this.connectedCells);
 	var room;
 	var otherRoom;
 	var validRoom;
@@ -3306,7 +3332,7 @@ ROT.Map.Rogue.prototype._connectUnconnectedRooms = function() {
 			
 			if (room["connections"].length == 0) {
 				var directions = [0,2,4,6];
-				directions = directions.randomize();
+				directions = ROT.RNG.randomize(directions);
 				
 				var validRoom = false;
 				
@@ -3957,7 +3983,7 @@ ROT.Noise.Simplex = function(gradients) {
 	var permutations = [];
 	var count = gradients || 256;
 	for (var i=0;i<count;i++) { permutations.push(i); }
-	permutations = permutations.randomize();
+	permutations = ROT.RNG.randomize(permutations);
 
 	this._perms = [];
 	this._indexes = [];
