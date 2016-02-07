@@ -59,8 +59,6 @@ ROT.Map.Digger.prototype.create = function(callback) {
 		var y = parseInt(parts[1]);
 		var dir = this._getDiggingDirection(x, y);
 		if (!dir) { continue; } /* this wall is not suitable */
-		
-//		console.log("wall", x, y);
 
 		/* try adding a feature */
 		var featureAttempts = 0;
@@ -80,10 +78,12 @@ ROT.Map.Digger.prototype.create = function(callback) {
 		}
 
 	} while (this._dug/area < this._options.dugPercentage || priorityWalls); /* fixme number of priority walls */
-
+	//console.log('adding doors')
 	this._addDoors();
+	//console.log('calling back')
 
 	if (callback) {
+		//console.log('... calback detetcted this._width = '+this._width+', this._height = '+this._height);
 		for (var i=0;i<this._width;i++) {
 			for (var j=0;j<this._height;j++) {
 				callback(i, j, this._map[i][j]);
@@ -91,8 +91,8 @@ ROT.Map.Digger.prototype.create = function(callback) {
 		}
 	}
 	
-	this._walls = {};
-	this._map = null;
+	//this._walls = {};
+	//this._map = null;
 
 	return this;
 }
@@ -145,8 +145,8 @@ ROT.Map.Digger.prototype._findWall = function() {
 	
 	var arr = (prio2.length ? prio2 : prio1);
 	if (!arr.length) { return null; } /* no walls :/ */
-	
-	var id = arr.random();
+
+	var id = ROT.RNG.random(arr);
 	delete this._walls[id];
 
 	return id;
